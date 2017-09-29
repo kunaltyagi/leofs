@@ -19,14 +19,16 @@
 # under the License.
 #
 #======================================================================
-.PHONY: all compile deps clean distclean test generate release replace_launch_env release_for_test pkgsrc docker_build docker_run docker_compile
+.PHONY: all compile deps clean distclean test generate release replace_launch_env release_for_test pkgsrc docker_build docker_run docker_compile docker_join
 
 project := leo-project/leofs
 version := 1.3.7
 docker_name := ${project}:${version}
+docker_inp :=
 docker_command := docker run --rm --volume $(CURDIR):/home/${project} \
-	--workdir /home/${project} # --user $$(id -u):$$(id -g)
+	--workdir /home/${project} ${docker_inp}  # --user $$(id -u):$$(id -g)
 docker_cmd_end := ${docker_name} env HOME=/home/leo-project
+docker_name := leofs_docker
 
 all: deps compile
 compile:
@@ -44,7 +46,9 @@ docker_build:
 docker_compile:
 	${docker_command} ${docker_cmd_end} make
 docker_run:
-	${docker_command} -it -name ${1:-leofs_docker} ${docker_cmd_end} bash
+	${docker_command} -it --name ${docker_name} ${docker_cmd_end} bash
+docker_join:
+	docker exec -it ${docker_name} bash
 test:
 	(cd apps/leo_manager && make)
 	(cd apps/leo_gateway && make)

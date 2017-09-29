@@ -130,7 +130,7 @@ do
 done
 
 ./leofs-adm start
-sleep 5
+sleep 1
 ./leofs-adm status
 
 echo "*** leofs - Finished :) ***"
