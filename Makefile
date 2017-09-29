@@ -44,7 +44,7 @@ docker_build:
 docker_compile:
 	${docker_command} ${docker_cmd_end} make
 docker_run:
-	${docker_command} -it ${docker_cmd_end} bash
+	${docker_command} -it -name ${1:-leofs_docker} ${docker_cmd_end} bash
 test:
 	(cd apps/leo_manager && make)
 	(cd apps/leo_gateway && make)
