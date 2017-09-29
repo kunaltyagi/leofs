@@ -1,4 +1,4 @@
-#!/bin/sh
+#! /usr/bin/env bash
 #======================================================================
 #
 # LeoFS
@@ -110,26 +110,27 @@ if [ $1 = "build" ]; then
     echo ""
     exit 1
 fi
-./package/leo_manager_0/bin/leo_manager start
-sleep 1
-./package/leo_manager_1/bin/leo_manager start
-sleep 1
-./package/leo_storage_0/bin/leo_storage start
-sleep 1
-./package/leo_storage_1/bin/leo_storage start
-sleep 1
-./package/leo_storage_2/bin/leo_storage start
-sleep 1
-./package/leo_storage_3/bin/leo_storage start
 
-echo ":::"
-echo "::: Starting the storages :::"
-echo ":::"
-sleep 30
-./package/leo_gateway_0/bin/leo_gateway start
+declare -a part=("leo_manager" "leo_storage" "leo_gateway")
+
+for i in "${part[@]}"
+do
+    for j in ./package/"$i"*
+    do
+        k="$j"/bin/"$i"
+        echo "Starting ""$k"
+        $k start
+        $k ping
+        while [ $? -ne 0 ];
+        do
+            sleep 1
+            $k ping
+        done
+    done
+done
 
 ./leofs-adm start
-sleep 1
+sleep 5
 ./leofs-adm status
 
 echo "*** leofs - Finished :) ***"
