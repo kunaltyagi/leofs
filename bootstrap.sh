@@ -55,6 +55,9 @@ fi
 
 ## Generate the packages
 make release_for_test
+if [ $? -ne 0 ]; then
+    exit $?
+fi
 
 ## Copy the storage-files
 cp -r package/leo_storage package/leo_storage_0

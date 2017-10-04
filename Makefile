@@ -21,14 +21,13 @@
 #======================================================================
 .PHONY: all compile deps clean distclean test generate release replace_launch_env release_for_test pkgsrc docker_build docker_run docker_compile docker_join
 
-project := leo-project/leofs
+project := leo_project/leofs
 version := 1.3.7
-docker_name := ${project}:${version}
+docker_name := leofs_docker
 docker_inp :=
 docker_command := docker run --rm --volume $(CURDIR):/home/${project} \
 	--workdir /home/${project} ${docker_inp}  # --user $$(id -u):$$(id -g)
-docker_cmd_end := ${docker_name} env HOME=/home/leo-project
-docker_name := leofs_docker
+docker_cmd_end := ${project} env HOME=/home/leo_project
 
 all: deps compile
 compile:
@@ -42,7 +41,7 @@ distclean:
 	@./rebar delete-deps
 	@./rebar clean
 docker_build:
-	docker build -t ${docker_name} .
+	docker build -t ${project}:${version} -t ${project}:latest .
 docker_compile:
 	${docker_command} ${docker_cmd_end} make
 docker_run:
@@ -61,8 +60,7 @@ generate:
 	(cd rel/leo_manager && ../../rebar generate)
 	(cd rel/leo_storage && ../../rebar generate)
 	(cd rel/leo_gateway && ../../rebar generate)
-release:
-	@./rebar compile
+release: compile
 	rm -rf package/leo_*
 	#
 	# manager-master
@@ -114,8 +112,9 @@ replace_launch_env:
 	  echo '# Defaults to "leofs"'; \
 	  echo 'RUNNER_USER=${USER}'; \
 	) > rel/common/launch.environment
-	sudo rm -rf /tmp/home
-release_for_test: replace_launch_env release
+	if [ `whoami` != "root" ]; then sudo rm -rf /tmp/home; else rm -rf /tmp/home; fi
+
+release_for_test: deps replace_launch_env release
 
 pkgsrc: release
 	make -C pkg
